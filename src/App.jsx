@@ -1,53 +1,40 @@
-import "./App.css";
-import Description from "./components/Description/Description.jsx";
-import Feedback from "./components/Feedback/Feedback.jsx";
-import Options from "./components/Options/Options.jsx";
-import Notification from "./components/Notification/Notification.jsx";
+import css from "./App.module.css";
+import ContactForm from "./components/ContactForm/ContactForm";
+import ContactList from "./components/ContactList/ContactList";
+import SearchBox from "./components/SearchBox/SearchBox";
 import { useState, useEffect } from "react";
-// import clsx from "clsx";
+import InitialContacts from "./contacts.json";
 
 function App() {
-  const [feedback, setFeedback] = useState(
-    JSON.parse(localStorage.getItem("feedback")) ?? {
-      good: 0,
-      neutral: 0,
-      bad: 0,
-    }
-  );
-  const FeedbackSummary = feedback.good + feedback.neutral + feedback.bad;
-  const FeedbackPositiveProcents =
-    FeedbackSummary > 0
-      ? Math.round((feedback.good / FeedbackSummary) * 100)
-      : 0;
+  const [contacts, setContacts] = useState(() => {
+    const savedContacts = localStorage.getItem("contacts");
+    return savedContacts ? JSON.parse(savedContacts) : InitialContacts;
+  });
+
+  const [filter, setFilter] = useState("");
   useEffect(() => {
-    localStorage.setItem("feedback", JSON.stringify(feedback));
-  }, [feedback]);
-  const updateFeedback = (feedbackType) => {
-    feedbackType === "reset"
-      ? setFeedback({ good: 0, neutral: 0, bad: 0 })
-      : setFeedback({
-          ...feedback,
-          [feedbackType]: feedback[feedbackType] + 1,
-        });
+    localStorage.setItem("contacts", JSON.stringify(contacts));
+  }, [contacts]);
+  const addContact = (newContact) => {
+    setContacts((prevContacts) => {
+      return [...prevContacts, newContact];
+    });
   };
+  const deleteContact = (contactId) => {
+    setContacts((prevContacts) => {
+      return prevContacts.filter((contact) => contact.id !== contactId);
+    });
+  };
+  const visibleContacts = contacts.filter((contact) =>
+    contact.name.toLowerCase().includes(filter.toLowerCase())
+  );
   return (
     <>
-      <div className="spacing">
-        <Description />
-      </div>
-      <div className="spacing">
-        <Options onFeedbackAction={updateFeedback} totalFB={FeedbackSummary} />
-      </div>
-      <div className="spacing">
-        {FeedbackSummary > 0 ? (
-          <Feedback
-            feedback={feedback}
-            FeedbackSummary={FeedbackSummary}
-            FeedbackPositiveProcents={FeedbackPositiveProcents}
-          />
-        ) : (
-          <Notification />
-        )}
+      <div className={css.container}>
+        <h1>Phonebook</h1>
+        <ContactForm onAdd={addContact} />
+        <SearchBox value={filter} onFilter={setFilter} />
+        <ContactList contacts={visibleContacts} onDelete={deleteContact} />
       </div>
     </>
   );
