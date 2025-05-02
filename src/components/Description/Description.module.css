@@ -1,0 +1,17 @@
+.container {
+  margin: 0 auto;
+}
+.title {
+  font-size: 36px;
+  letter-spacing: 1.5;
+}
+.text {
+  font-size: 18px;
+  line-height: 1.5;
+}
+.title_span {
+  color: green;
+}
+.span {
+  color: rgb(231, 128, 231);
+}
